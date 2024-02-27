@@ -55,6 +55,7 @@ res <- rma(yi, vi, data = dat)
 weights <- fmtx(weights(res), digits = 2)
 dat <- mutate(dat, weights = weights)
 
+
 ############################################################################
 get_summary <- function(dat, y) {
     ### fit random-effects model
@@ -97,7 +98,7 @@ for (sg in rev(names(res_dict))) {
 
     # add subgroup label
     new_entries <- data.frame(
-        entry = n_entries - y_iter - res_dict[[sg]]$count,
+        entry = n_entries - y_iter - res_dict[[sg]]$count + 0.5,
         label = sg,
         weight = "",
         metric = ""
@@ -132,7 +133,10 @@ for (sg in rev(names(res_dict))) {
     subgroup_layers <- list(
         geom_polygon(
             data = summary_polygon, aes(x = x, y = y),
-            fill = "gray", alpha = 0.3, inherit.aes = FALSE
+            # fill = "gray", alpha = 0.3,
+            color = "black",
+            fill = "transparent",
+            inherit.aes = FALSE
         ),
         geom_point(
             data = dat_subgroup, aes(x = yi, y = yn), shape = 15, size = 3
@@ -154,7 +158,10 @@ res <- output[[2]]
 summary_layer <- list(
     geom_polygon(
         data = summary_polygon, aes(x = x, y = y),
-        fill = "gray", alpha = 0.3, inherit.aes = FALSE
+        # fill = "gray", alpha = 0.3,
+        color = "black",
+        fill = "transparent",
+        inherit.aes = FALSE
     )
 )
 layers <- c(layers, summary_layer)
@@ -167,7 +174,7 @@ new_entries <- data.frame(
         fmtp(res$QMp, digits = 2, pname = "p", add0 = TRUE, sep = TRUE, equal = TRUE),
         ")"
     ),
-    weight = "100.00%",
+    weight = "100.00",
     metric = paste(fmtx(coef(res), digits = 2), " (", fmtx(res$ci.lb, digits = 2), "-", fmtx(res$ci.ub, digits = 2), ")", sep = "")
 )
 entries <- rbind(new_entries, entries)
@@ -184,8 +191,16 @@ forest_plot <- forest_plot +
     labs(x = "AUC", y = "")
 
 
+# Add effect line
+line_data <- data.frame(x = c(coef(res), coef(res)), y = c(0, 23.5))
 forest_plot <- forest_plot +
-    geom_vline(xintercept = coef(res), linetype = "dashed")
+    # geom_hline(yintercept = 1.5) +
+    # geom_hline(yintercept = 10.5) +
+    # geom_hline(yintercept = 17.5) +
+    geom_hline(yintercept = 23.5) +
+    geom_line(data = line_data, aes(x = x, y = y), linetype = "dashed")
+
+
 
 
 forest_plot <- forest_plot +
@@ -195,7 +210,7 @@ forest_plot <- forest_plot +
         axis.text.y = element_blank(),
         axis.title.y = element_blank()
     ) +
-    coord_cartesian(ylim = c(0.5, n_entries))
+    coord_cartesian(ylim = c(1, n_entries))
 
 # plot(forest_plot)
 
@@ -208,37 +223,50 @@ new_entry <- data.frame(
 entries <- rbind(new_entry, entries)
 entries <- entries[order(entries$entry, decreasing = FALSE), ]
 
-
 ############################################################################
 # get y-axis for the forest plot
 
 p_labels <-
     entries |>
     ggplot(aes(y = rev(entry)))
+p_labels <- entries |>
+    ggplot(aes(y = seq(max(entry), min(entry), by = -1)))
 
 # add the study as text (instead of as a label on the y axis)
 p_labels <-
     p_labels +
+    # geom_hline(yintercept = 1.5) +
+    # geom_hline(yintercept = 10.5) +
+    # geom_hline(yintercept = 17.5) +
+    geom_hline(yintercept = 23.5) +
     geom_text(aes(x = 0, label = label),
         hjust = 0,
-        fontface = ifelse(grepl("Subtotal", entries$label) | grepl("Study", entries$label) | grepl("Overall", entries$label) | (entries$label %in% subgroups), "bold", "plain")
+        fontface = ifelse(grepl("Subtotal", entries$label) | grepl("Study", entries$label) | grepl("Overall", entries$label) | (entries$label %in% subgroups), "bold", "plain"),
     )
+
+# p_labels <- ggplot(entries, aes(y = rev(entry))) +
+#     # geom_point() + # Add points (just as an example)
+#     geom_text(aes(x = 1, label = paste(label, entry)), y = rev(entries$entry), vjust = -0.5) # Add text annotations
 
 # remove the background and edit the sizing so that this left size of the plot will match up neatly with the middle and right sides of the plot
 p_labels <-
     p_labels +
     theme_void() +
-    coord_cartesian(xlim = c(0, 4.5), ylim = c(0.5, n_entries))
+    coord_cartesian(xlim = c(0, 4.5), ylim = c(1, n_entries))
 
-# plot(p_labels)
+plot(p_labels)
 
 
 ############################################################################
 # get extra annotations
 
 
+# p_annot <- entries |>
+#     ggplot(aes(y = rev(entry)))
+
 p_annot <- entries |>
-    ggplot(aes(y = rev(entry)))
+    ggplot(aes(y = seq(max(entry), min(entry), by = -1)))
+
 
 p_annot <- p_annot +
     geom_text(
@@ -257,18 +285,23 @@ p_annot <- p_annot +
 # remove the background and edit the sizing so that this left size of the plot will match up neatly with the middle and right sides of the plot
 p_annot <-
     p_annot +
+    # geom_hline(yintercept = 1.5) +
+    # geom_hline(yintercept = 10.5) +
+    # geom_hline(yintercept = 17.5) +
+    geom_hline(yintercept = 23.5) +
     theme_void() +
-    coord_cartesian(xlim = c(0, 2), ylim = c(0.5, n_entries))
+    coord_cartesian(xlim = c(0, 2), ylim = c(1, n_entries))
 
 # plot(p_annot)
 
 # ############################################################################
 
 layout <- c(
-    area(t = 0, l = 0, b = 30, r = 3), # left plot, starts at the top of the page (0) and goes 30 units down and 3 units to the right
-    area(t = 0, l = 4, b = 30, r = 9), # starts 1 unit right of the left plot (l=4, whereas left plot is r=3), goes to the bottom of the page (30 units), and 6 units further over from the left plot (r=9 whereas left plot is r=3)
+    area(t = 0, l = 0, b = 30, r = 4), # left plot, starts at the top of the page (0) and goes 30 units down and 3 units to the right
+    area(t = 0, l = 5, b = 30, r = 9), # starts 1 unit right of the left plot (l=4, whereas left plot is r=3), goes to the bottom of the page (30 units), and 6 units further over from the left plot (r=9 whereas left plot is r=3)
     area(t = 0, l = 10, b = 30, r = 12) # right most plot starts at top of page, begins where middle plot ends (l=9, and middle plot is r=9), goes to bottom of page (b=30), and extends two units wide (r=11)
 )
 
 p <- p_labels + forest_plot + p_annot + plot_layout(design = layout)
 plot(p)
+ggsave("plot.pdf", plot = p)
