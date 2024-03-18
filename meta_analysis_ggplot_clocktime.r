@@ -11,49 +11,62 @@ library(tidyverse)
 library(gt)
 library(patchwork)
 
+output_approach <- "clock-time"
+variable <- "AUC"
+
 
 data <- read_excel(
-    "/Users/anasofiacc/Library/CloudStorage/OneDrive-UniversidadedeLisboa/PhD/PreEpiSeizures/Seizure forecast/Systematic review/meta-analysis.xlsx",
+    "/Users/anasofiacc/Library/CloudStorage/OneDrive-UniversidadedeLisboa/PhD/PreEpiSeizures/Seizure forecast/Systematic review/Copy of meta-analysis.xlsx",
     sheet = "meta-analysis",
     na = "NA"
 )
-data <- data[1:(nrow(data) - 1), ]
 
-### prepare data
+variable_mean <- paste(variable, "(mean)", sep = " ")
+variable_sd <- paste(variable, "(SD)", sep = " ")
+
+# Get clock-time / interval-timed output approach
 dat <- subset(
-    data, (!is.na(data$"AUC (SD)")) & (data$"AUC (SD)" != 0)
+    data, (data$"Output approach" == output_approach) & (!is.na(data[[variable_sd]])) & (data[[variable_sd]] != 0)
 )
 
-dat$"AUC (SD)" <- as.numeric(dat$"AUC (SD)")
-dat$"AUC (mean)" <- as.numeric(dat$"AUC (mean)")
-dat$"# Patients" <- as.numeric(dat$"# Patients")
-
-dat <- mutate(dat,
-    SE = dat$"AUC (SD)" / sqrt(dat$"# Patients")
-)
-dat <- mutate(dat,
-    subgroup = dat$"Input data"
-)
-dat <- mutate(dat, vi = SE^2)
-dat <- mutate(dat, yi = dat$"AUC (mean)")
 
 dat <- mutate(dat, key = paste(
-    dat$Authors, dat$Year, dat$"Forecast horizon", dat$"Input data", dat$"Training and testing approach",
+    dat$"First author, year", dat$"Forecast horizon", dat$"Input data", dat$"Training and testing approach",
     sep = ", "
 ))
 dat$key <- as.character(dat$key)
 
+dat[[variable_sd]] <- as.numeric(dat[[variable_sd]])
+dat[[variable_mean]] <- as.numeric(dat[[variable_mean]])
+dat$"# Patients" <- as.numeric(dat$"# Patients")
+
+dat <- mutate(dat,
+    SE = dat[[variable_sd]] / sqrt(dat$"# Patients")
+)
+dat <- mutate(dat, vi = SE^2)
+dat <- mutate(dat, yi = dat[[variable_mean]])
+
+
+dat <- mutate(dat,
+    subgroup = dat$"Type of input data"
+)
+
 ### order data according to subgroup and yi
-dat <- dat[order(dat$Year, decreasing = TRUE), ]
+dat <- dat[order(dat$"First author, year", decreasing = TRUE), ]
 subgroups <- sort(unique(dat$subgroup), decreasing = TRUE)
 subgroup_counts <- table(dat$subgroup)
 
 res_dict <- setNames(lapply(subgroups, function(x) list(count = subgroup_counts[[x]])), subgroups)
+
+colnames <- colnames(dat)
 dat <- transform(dat, ci_low = yi - 1.96 * sqrt(vi), ci_upp = yi + 1.96 * sqrt(vi))
+colnames(dat) <- c(colnames, c("ci_low", "ci_upp"))
 
 res <- rma.uni(yi, vi, data = dat, method = "REML")
 weights <- fmtx(weights(res), digits = 2)
+
 dat <- mutate(dat, weights = weights)
+
 
 
 ############################################################################
@@ -108,7 +121,7 @@ for (sg in rev(names(res_dict))) {
     # create label between the entry and the Study and respective weight
     new_entries <- data.frame(
         entry = seq(n_entries - y_iter, n_entries - y_iter - res_dict[[sg]]$count + 1, by = -1),
-        label = paste(dat_subgroup$Authors, dat_subgroup$Year, sep = ", "),
+        label = dat_subgroup$"First author, year",
         weight = dat_subgroup$weights,
         metric = paste(fmtx(dat_subgroup$yi, digits = 2), " (", fmtx(dat_subgroup$ci_low, digits = 2), "-", fmtx(dat_subgroup$ci_upp, digits = 2), ")", sep = "")
     )
@@ -188,7 +201,7 @@ forest_plot <- ggplot() +
 
 # rename axes
 forest_plot <- forest_plot +
-    labs(x = "AUC", y = "")
+    labs(x = variable, y = "")
 
 
 # Add effect line
@@ -218,7 +231,7 @@ new_entry <- data.frame(
     entry = 1,
     label = "Study",
     weight = "Weight (%)",
-    metric = "AUC (95% CI)"
+    metric = paste(variable, "(95% CI)", sep = " ")
 )
 entries <- rbind(new_entry, entries)
 entries <- entries[order(entries$entry, decreasing = FALSE), ]
@@ -304,4 +317,4 @@ layout <- c(
 
 p <- p_labels + forest_plot + p_annot + plot_layout(design = layout)
 plot(p)
-ggsave("plot.pdf", plot = p)
+ggsave(paste("forest_", paste(output_approach, variable, sep = "_"), ".pdf", sep = ""), plot = p)
