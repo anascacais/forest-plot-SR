@@ -5,6 +5,7 @@ library(patchwork)
 source("meta_analysis_aux.r")
 source("data_aux.r")
 source("graphic_aux.r")
+source("filename.r")
 
 subset_strategy <- "Output approach"
 subset_name <- "clock-time"
@@ -17,7 +18,7 @@ effect_size <- "AUC"
 
 
 data <- read_excel(
-    "meta-analysis.xlsx",
+    filename,
     sheet = "meta-analysis",
     na = "NA"
 )
