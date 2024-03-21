@@ -17,7 +17,7 @@ effect_size <- "AUC"
 
 
 data <- read_excel(
-    "/Users/anasofiacc/Library/CloudStorage/OneDrive-UniversidadedeLisboa/PhD/PreEpiSeizures/Seizure forecast/Systematic review/Copy of meta-analysis.xlsx",
+    "meta-analysis.xlsx",
     sheet = "meta-analysis",
     na = "NA"
 )
