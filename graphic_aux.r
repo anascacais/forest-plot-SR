@@ -1,6 +1,5 @@
 library(metafor)
 library(ggplot2)
-library(dplyr)
 library(plyr)
 
 get_summary <- function(dat, y) {

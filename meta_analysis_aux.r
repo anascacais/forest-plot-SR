@@ -1,6 +1,5 @@
-library(ggplot2)
-library(metafor)
 library(dplyr)
+
 
 get_effect_size <- function(dat, effect_size_mean, effect_size_sd) {
     #' Get the effect size and its standard error

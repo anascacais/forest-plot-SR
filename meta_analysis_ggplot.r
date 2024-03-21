@@ -1,17 +1,5 @@
-# Load libraries for meta-analysis
-library(robumeta)
-library(metafor)
-
-
-# Load library for reading excel files
 library(readxl)
-library(ggplot2)
-
-library(tidyverse)
-library(gt)
 library(patchwork)
-library(plyr)
-
 
 # Local
 source("meta_analysis_aux.r")
