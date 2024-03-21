@@ -192,27 +192,15 @@ p_annot <- entries |>
 
 
 p_annot <- p_annot +
-    geom_text(
-        aes(x = 0.5, label = weight),
-        hjust = 0.5,
-        fontface = ifelse(grepl("Study", entries$label), "bold", "plain"),
-    )
+    draw_labels(pos = 0.5, key = entries$weight, hjust = 0.5, label = entries$label) +
+    draw_labels(pos = 1.5, key = entries$metric, hjust = 0.5, label = entries$label)
 
-p_annot <- p_annot +
-    geom_text(
-        aes(x = 1.5, label = metric),
-        hjust = 0.5,
-        fontface = ifelse(grepl("Study", entries$label), "bold", "plain"),
-    )
 
 # remove the background and edit the sizing so that this left size of the plot will match up neatly with the middle and right sides of the plot
-p_annot <-
-    p_annot +
+p_annot <- p_annot +
     geom_hline(yintercept = n_entries - 1 + 0.5) +
     theme_void() +
     coord_cartesian(xlim = c(0, 2), ylim = c(1, n_entries))
-
-plot(p_annot)
 
 # ############################################################################
 
@@ -225,6 +213,9 @@ layout <- c(
 
 p <- p_labels + forest_plot + p_annot + plot_layout(design = layout)
 plot(p)
-ggsave(paste("forest_", paste(subset_name, effect_size, sep = "_"), ".pdf", sep = ""), plot = p)
-
-# TODO: make height of the plot dynamic (b = 30)
+ggsave(
+    paste("forest_", paste(subset_name, effect_size, sep = "_"), ".pdf", sep = ""),
+    plot = p,
+    height = n_entries * 0.5,
+    # this keeps more or less the same distance between plot entries/rows
+)
