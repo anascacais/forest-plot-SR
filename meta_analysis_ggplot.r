@@ -8,7 +8,7 @@ source("graphic_aux.r")
 source("filename.r")
 
 subset_strategy <- "Output approach"
-subset_name <- "clock-time"
+subset_name <- "interval-timed"
 
 subgroup_strategy <- "Type of input data"
 
@@ -41,6 +41,8 @@ dat <- get_effect_size(dat, effect_size_mean, effect_size_sd)
 
 # Get overall meta-analysis result
 overall_res <- rma.uni(yi, vi, data = dat, method = "REML")
+test_heterogeneity(data = dat, overall_res, mods = c("Type of input data", "Forecast horizon", "Training and testing approach"))
+
 weights <- fmtx(weights(overall_res), digits = 2)
 dat <- mutate(dat, weights = weights)
 
@@ -49,7 +51,10 @@ dat <- temp[[1]]
 res_dict <- temp[[2]]
 n_entries <- temp[[3]]
 
-subgroup_analysis <- !any(sapply(res_dict, function(x) x$count <= 2))
+subgroup_analysis <- !any(sapply(res_dict, function(x) x$count < 2))
+if (!subgroup_analysis) {
+    n_entries <- n_entries - length(names(res_dict))
+}
 
 ############################################################################
 # Prepare forest plot and entries for remaining plot info

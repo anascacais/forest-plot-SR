@@ -1,4 +1,5 @@
 library(dplyr)
+library(metafor)
 
 
 get_effect_size <- function(dat, effect_size_mean, effect_size_sd) {
@@ -31,13 +32,25 @@ prepare_subgroup_analysis <- function(dat, subgroup_strategy, subgroup_analysis 
 
     res_dict <- setNames(lapply(subgroups, function(x) list(count = subgroup_counts[[x]])), subgroups)
 
-    # if there are subgroups with less than 2 entries, subgroup analysis in not performed
-    if (any(sapply(res_dict, function(x) x$count <= 2))) {
-        subgroup_analysis <- FALSE
-    }
-
     # Entry for titles (last entry) + empty entry after each subgroup summary
-    n_entries <- length((dat$yi)) + length(names(res_dict)) * (1 + 1 * subgroup_analysis) + 2
+    n_entries <- length((dat$yi)) + length(names(res_dict)) * 2 + 2
 
     return(list(dat, res_dict, n_entries))
+}
+
+test_heterogeneity <- function(data, overall_res, mods) {
+    print(paste("overall I^2:", fmtx(overall_res$I2, digits = 2)))
+    for (mod in mods) {
+        if (min(table(data[[mod]])) > 1 && length(unique(data[[mod]])) > 1) {
+            overall_res_mods <- rma.uni(yi, vi, data = data, method = "REML", mods = ~ factor(dat[[mod]]))
+            print(paste(
+                mod,
+                "| I^2 with mods", fmtx(overall_res_mods$I2, digits = 2),
+                "| min counts:", min(table(data[[mod]])),
+                sep = " "
+            ))
+        } else {
+            print(paste(mod, ": not enough data for subgroup analysis", sep = " "))
+        }
+    }
 }
