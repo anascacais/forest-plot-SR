@@ -27,15 +27,15 @@ draw_summary_polygon <- function(summary_polygon) {
 }
 
 
-draw_study_results <- function(dat_subgroup) {
-    list(
+draw_study_results <- function(dat_subgroup, layers) {
+    new_layers <- list(
         geom_point(
             data = dat_subgroup, aes(x = yi, y = yn), shape = 15, size = 3
         ),
         geom_linerange(data = dat_subgroup, aes(xmin = ci_low, xmax = ci_upp, y = yn))
     )
+    return(layers <- c(layers, new_layers))
 }
-
 
 
 get_studies_info <- function(dat_subgroup, study_label_strategy, pos) {
@@ -85,17 +85,10 @@ make_summary <- function(dat, entries, layers, n_entries, pos, subtotal = TRUE) 
     )
     entries <- rbind.fill(entries, new_entries)
 
-    # Create layers for this subgroup, adding the mean metric, CI and summary polygon
-    if (subtotal) {
-        new_layers <- list(
-            draw_summary_polygon(summary_polygon),
-            draw_study_results(dat)
-        )
-    } else {
-        new_layers <- list(
-            draw_summary_polygon(summary_polygon)
-        )
-    }
+    # Create layers, adding the mean metric, CI and summary polygon
+    new_layers <- list(
+        draw_summary_polygon(summary_polygon)
+    )
     layers <- c(layers, new_layers)
 
     return(list(entries, layers))

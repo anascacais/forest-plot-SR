@@ -49,11 +49,13 @@ dat <- temp[[1]]
 res_dict <- temp[[2]]
 n_entries <- temp[[3]]
 
+subgroup_analysis <- !any(sapply(res_dict, function(x) x$count <= 2))
+
 ############################################################################
 # Prepare forest plot and entries for remaining plot info
 
 layers <- list()
-y_iter <- 2
+y_iter <- 1 + (1 * subgroup_analysis)
 
 entries <- data.frame(
     entry = numeric(),
@@ -89,16 +91,18 @@ for (sg in rev(names(res_dict))) {
         approach = ifelse(dat_subgroup$"Training and testing approach" == "prospective", "(*)", "")
     )
     entries <- rbind.fill(entries, new_entries)
+    layers <- draw_study_results(dat_subgroup, layers)
+
 
     # Add summary for this subgroup (if there are subgroups with less than 2 entries, subgroup analysis in not performed)
-    if (all(sapply(res_dict, function(x) x$count > 2))) {
+    if (subgroup_analysis) {
         temp <- make_summary(dat_subgroup, entries, layers, n_entries, pos = y_iter)
         entries <- temp[[1]]
         layers <- temp[[2]]
     }
 
     # add empty entry between subgroups
-    y_iter <- y_iter + res_dict[[sg]]$count + 2
+    y_iter <- y_iter + res_dict[[sg]]$count + 1 + (1 * subgroup_analysis)
 }
 
 
