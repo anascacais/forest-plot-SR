@@ -48,7 +48,6 @@ temp <- prepare_subgroup_analysis(dat, subgroup_strategy)
 dat <- temp[[1]]
 res_dict <- temp[[2]]
 n_entries <- temp[[3]]
-subgroups <- temp[[4]]
 
 ############################################################################
 # Prepare forest plot and entries for remaining plot info
@@ -91,10 +90,12 @@ for (sg in rev(names(res_dict))) {
     )
     entries <- rbind.fill(entries, new_entries)
 
-    # Add summary for this subgroup
-    temp <- make_summary(dat_subgroup, entries, layers, n_entries, pos = y_iter)
-    entries <- temp[[1]]
-    layers <- temp[[2]]
+    # Add summary for this subgroup (if there are subgroups with less than 2 entries, subgroup analysis in not performed)
+    if (all(sapply(res_dict, function(x) x$count > 2))) {
+        temp <- make_summary(dat_subgroup, entries, layers, n_entries, pos = y_iter)
+        entries <- temp[[1]]
+        layers <- temp[[2]]
+    }
 
     # add empty entry between subgroups
     y_iter <- y_iter + res_dict[[sg]]$count + 2
@@ -162,7 +163,7 @@ p_labels <- entries |>
 p_labels <-
     p_labels +
     geom_hline(yintercept = n_entries - 1 + 0.5) +
-    draw_labels(pos = 0, key = entries$label, hjust = 0, label = entries$label, subgroups = subgroups) +
+    draw_labels(pos = 0, key = entries$label, hjust = 0, label = entries$label, subgroups = names(res_dict)) +
     draw_labels(pos = 1.5, key = entries$horizon, hjust = 0.5, label = entries$label) +
     draw_labels(pos = 2.5, key = entries$approach, hjust = 0.5, label = entries$label)
 
