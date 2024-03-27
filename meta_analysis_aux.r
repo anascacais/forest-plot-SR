@@ -26,6 +26,7 @@ get_effect_size <- function(dat, effect_size_mean, effect_size_sd) {
 prepare_subgroup_analysis <- function(dat, subgroup_strategy, subgroup_analysis = TRUE) {
     # Order data according to subgroup and yi
     dat <- mutate(dat, subgroup = dat[[subgroup_strategy]])
+    dat <- dat[order(dat$"First author, year", decreasing = TRUE), ]
 
     subgroups <- sort(unique(dat$subgroup), decreasing = TRUE)
     subgroup_counts <- table(dat$subgroup)

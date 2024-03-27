@@ -11,9 +11,12 @@ prepare_dataframe <- function(data, subset_strategy, subset_name, effect_size_me
     #' @param effect_size_sd string with the name of the column with the standard deviation of the effect size
     #' @param key_strategy string with the name of the column to create the key for the meta-analysis
 
-    data <- subset(
-        data, (data[subset_strategy] == subset_name)
-    )
+    if (!is.na(subset_strategy)) {
+        data <- subset(
+            data, (data[subset_strategy] == subset_name)
+        )
+    }
+
 
     data <- subset(
         data, (!is.na(data[[effect_size_sd]])) & (data[[effect_size_sd]] != 0)

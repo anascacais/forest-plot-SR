@@ -6,4 +6,4 @@ Based on a post by Katherine Hoffman (https://www.khstats.com/blog/forest-plots/
 
 Currently, in works for a systematic review on seizure forecasting.
 
-[Example](forest_clock-time_AUC.pdf)
+[Example](forest_NA_AUC.pdf)

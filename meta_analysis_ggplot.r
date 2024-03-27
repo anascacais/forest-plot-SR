@@ -7,14 +7,14 @@ source("data_aux.r")
 source("graphic_aux.r")
 source("filename.r")
 
-subset_strategy <- "Output approach"
-subset_name <- "interval-timed"
+subset_strategy <- NA # "Output approach"
+subset_name <- NA
 
 subgroup_strategy <- "Type of input data"
 
 study_label_strategy <- "First author, year"
 
-effect_size <- "AUC"
+effect_size <- "BSS"
 
 
 data <- read_excel(
@@ -68,6 +68,7 @@ entries <- data.frame(
     weight = character(),
     metric = character(),
     horizon = character(),
+    size = character(),
     approach = character(),
     stringsAsFactors = FALSE
 )
@@ -93,7 +94,8 @@ for (sg in rev(names(res_dict))) {
         weight = dat_subgroup$weights,
         metric = paste(fmtx(dat_subgroup$yi, digits = 2), " (", fmtx(dat_subgroup$ci_low, digits = 2), "-", fmtx(dat_subgroup$ci_upp, digits = 2), ")", sep = ""),
         horizon = dat_subgroup$"Forecast horizon",
-        approach = ifelse(dat_subgroup$"Training and testing approach" == "prospective", "(*)", "")
+        size = dat_subgroup$"# Patients",
+        approach = ifelse(dat_subgroup$"Training and testing approach" == "prospective", "P", "R")
     )
     entries <- rbind.fill(entries, new_entries)
     layers <- draw_study_results(dat_subgroup, layers)
@@ -120,11 +122,12 @@ layers <- temp[[2]]
 # Add titles
 new_entry <- data.frame(
     entry = 1,
-    label = "Study",
+    label = "First author, year",
     weight = "Weight (%)",
     metric = paste(effect_size, "(95% CI)", sep = " "),
-    horizon = "Forecast Horizon",
-    approach = "(*)"
+    horizon = "Forecast\nhorizon",
+    size = "Sample\nsize",
+    approach = "R/P"
 )
 entries <- rbind.fill(new_entry, entries)
 entries <- entries[order(entries$entry, decreasing = FALSE), ]
@@ -174,13 +177,14 @@ p_labels <-
     geom_hline(yintercept = n_entries - 1 + 0.5) +
     draw_labels(pos = 0, key = entries$label, hjust = 0, label = entries$label, subgroups = names(res_dict)) +
     draw_labels(pos = 1.5, key = entries$horizon, hjust = 0.5, label = entries$label) +
-    draw_labels(pos = 2.5, key = entries$approach, hjust = 0.5, label = entries$label)
+    draw_labels(pos = 2.5, key = entries$size, hjust = 0.5, label = entries$label) +
+    draw_labels(pos = 3, key = entries$approach, hjust = 0.5, label = entries$label)
 
 # remove the background and edit the sizing so that this left size of the plot will match up neatly with the middle and right sides of the plot
 p_labels <-
     p_labels +
     theme_void() +
-    coord_cartesian(xlim = c(0, 2.5), ylim = c(1, n_entries))
+    coord_cartesian(xlim = c(0, 3), ylim = c(1, n_entries))
 
 
 ############################################################################
@@ -204,8 +208,8 @@ p_annot <- p_annot +
 # ############################################################################
 
 layout <- c(
-    area(t = 0, l = 0, b = 30, r = 4), # left plot, starts at the top of the page (0) and goes 30 units down and 3 units to the right
-    area(t = 0, l = 5, b = 30, r = 9), # starts 1 unit right of the left plot (l=4, whereas left plot is r=3), goes to the bottom of the page (30 units), and 6 units further over from the left plot (r=9 whereas left plot is r=3)
+    area(t = 0, l = 0, b = 30, r = 5), # left plot, starts at the top of the page (0) and goes 30 units down and 3 units to the right
+    area(t = 0, l = 6, b = 30, r = 9), # starts 1 unit right of the left plot (l=4, whereas left plot is r=3), goes to the bottom of the page (30 units), and 6 units further over from the left plot (r=9 whereas left plot is r=3)
     area(t = 0, l = 10, b = 30, r = 13) # right most plot starts at top of page, begins where middle plot ends (l=9, and middle plot is r=9), goes to bottom of page (b=30), and extends two units wide (r=11)
 )
 

@@ -60,7 +60,7 @@ get_summary_info <- function(res, pos, weight, subtotal = TRUE) {
             paste(
                 label,
                 " (I^2 =",
-                round(res$I2, digits = 3), "%, ",
+                round(res$I2, digits = 2), "%, ",
                 fmtp(res$QMp, digits = 2, pname = "p", add0 = TRUE, sep = TRUE, equal = TRUE),
                 ")"
             ),
@@ -97,9 +97,9 @@ make_summary <- function(dat, entries, layers, n_entries, pos, subtotal = TRUE) 
 
 draw_labels <- function(pos, key, hjust, labels, subgroups = c(NA)) {
     if (anyNA(subgroups)) {
-        fontface_strategy <- ifelse(grepl("Study", labels), "bold", "plain") # corresponds to pos = 1
+        fontface_strategy <- ifelse(grepl("First author, year", labels), "bold", "plain") # corresponds to pos = 1
     } else {
-        fontface_strategy <- ifelse(grepl("Subtotal", labels) | grepl("Study", labels) | grepl("Overall", labels) | (labels %in% subgroups), "bold", "plain")
+        fontface_strategy <- ifelse(grepl("Subtotal", labels) | grepl("First author, year", labels) | grepl("Overall", labels) | (labels %in% subgroups), "bold", "plain")
     }
 
     geom_text(
