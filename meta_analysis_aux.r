@@ -42,16 +42,12 @@ prepare_subgroup_analysis <- function(dat, subgroup_strategy, subgroup_analysis 
 test_heterogeneity <- function(data, overall_res, mods) {
     print(paste("overall I^2:", fmtx(overall_res$I2, digits = 2)))
     for (mod in mods) {
-        if (min(table(data[[mod]])) > 1 && length(unique(data[[mod]])) > 1) {
-            overall_res_mods <- rma.uni(yi, vi, data = data, method = "REML", mods = ~ factor(dat[[mod]]))
-            print(paste(
-                mod,
-                "| I^2 with mods", fmtx(overall_res_mods$I2, digits = 2),
-                "| min counts:", min(table(data[[mod]])),
-                sep = " "
-            ))
-        } else {
-            print(paste(mod, ": not enough data for subgroup analysis", sep = " "))
-        }
+        overall_res_mods <- rma.uni(yi, vi, data = data, method = "REML", mods = ~ factor(dat[[mod]]))
+        print(paste(
+            mod,
+            "| I^2 with mods", fmtx(overall_res_mods$I2, digits = 2),
+            "| min counts:", min(table(data[[mod]])),
+            sep = " "
+        ))
     }
 }

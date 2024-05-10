@@ -20,7 +20,7 @@ draw_summary_polygon <- function(summary_polygon) {
     geom_polygon(
         data = summary_polygon, aes(x = x, y = y),
         # fill = "gray", alpha = 0.3,
-        color = "black",
+        color = "#696767",
         fill = "transparent",
         inherit.aes = FALSE
     )
@@ -30,9 +30,9 @@ draw_summary_polygon <- function(summary_polygon) {
 draw_study_results <- function(dat_subgroup, layers) {
     new_layers <- list(
         geom_point(
-            data = dat_subgroup, aes(x = yi, y = yn), shape = 15, size = 3
+            data = dat_subgroup, aes(x = yi, y = yn), shape = 18, size = 5, colour = "#696767"
         ),
-        geom_linerange(data = dat_subgroup, aes(xmin = ci_low, xmax = ci_upp, y = yn))
+        geom_linerange(data = dat_subgroup, aes(xmin = ci_low, xmax = ci_upp, y = yn), colour = "#696767")
     )
     return(layers <- c(layers, new_layers))
 }
@@ -90,6 +90,13 @@ make_summary <- function(dat, entries, layers, n_entries, pos, subtotal = TRUE) 
         draw_summary_polygon(summary_polygon)
     )
     layers <- c(layers, new_layers)
+
+    print(paste(
+        fmtx(coef(res), digits = 2),
+        " (\\gls{CI}=", fmtx(res$ci.lb, digits = 2), "-", fmtx(res$ci.ub, digits = 2),
+        ", I$^2$=", fmtx(res$I2, digits = 2), "\\%)",
+        sep = ""
+    ))
 
     return(list(entries, layers))
 }

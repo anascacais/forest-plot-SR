@@ -14,7 +14,7 @@ subgroup_strategy <- "Type of input data"
 
 study_label_strategy <- "First author, year"
 
-effect_size <- "BSS"
+effect_size <- "AUC"
 
 
 data <- read_excel(
@@ -31,6 +31,7 @@ dat <- prepare_dataframe(
     data,
     subset_strategy,
     subset_name,
+    subgroup_strategy,
     effect_size_mean,
     effect_size_sd
 )
@@ -41,7 +42,7 @@ dat <- get_effect_size(dat, effect_size_mean, effect_size_sd)
 
 # Get overall meta-analysis result
 overall_res <- rma.uni(yi, vi, data = dat, method = "REML")
-test_heterogeneity(data = dat, overall_res, mods = c("Type of input data", "Forecast horizon", "Training and testing approach"))
+test_heterogeneity(data = dat, overall_res, mods = c("Output approach", "Type of input data", "Forecast horizon", "Training and testing approach", "Year", "Data source"))
 
 weights <- fmtx(weights(overall_res), digits = 2)
 dat <- mutate(dat, weights = weights)
@@ -51,7 +52,7 @@ dat <- temp[[1]]
 res_dict <- temp[[2]]
 n_entries <- temp[[3]]
 
-subgroup_analysis <- !any(sapply(res_dict, function(x) x$count < 2))
+subgroup_analysis <- TRUE # !any(sapply(res_dict, function(x) x$count < 2))
 if (!subgroup_analysis) {
     n_entries <- n_entries - length(names(res_dict))
 }
@@ -119,6 +120,10 @@ entries <- temp[[1]]
 layers <- temp[[2]]
 
 
+
+
+
+
 # Add titles
 new_entry <- data.frame(
     entry = 1,
@@ -149,8 +154,9 @@ forest_plot <- forest_plot +
 # Add effect line
 line_data <- data.frame(x = c(coef(overall_res), coef(overall_res)), y = c(0, n_entries - 1 + 0.5))
 forest_plot <- forest_plot +
-    geom_hline(yintercept = n_entries - 1 + 0.5) +
-    geom_line(data = line_data, aes(x = x, y = y), linetype = "dashed")
+    geom_hline(yintercept = n_entries - 1 + 0.5, colour = "#696767") +
+    scale_color_identity() +
+    geom_line(data = line_data, aes(x = x, y = y), linetype = "dashed", colour = "#5698A3", linewidth = 1)
 
 forest_plot <- forest_plot +
     theme(
@@ -174,7 +180,8 @@ p_labels <- entries |>
 # add the study and extra info as text
 p_labels <-
     p_labels +
-    geom_hline(yintercept = n_entries - 1 + 0.5) +
+    geom_hline(yintercept = n_entries - 1 + 0.5, colour = "#696767") +
+    scale_color_identity() +
     draw_labels(pos = 0, key = entries$label, hjust = 0, label = entries$label, subgroups = names(res_dict)) +
     draw_labels(pos = 1.5, key = entries$horizon, hjust = 0.5, label = entries$label) +
     draw_labels(pos = 2.5, key = entries$size, hjust = 0.5, label = entries$label) +
@@ -201,7 +208,8 @@ p_annot <- p_annot +
 
 # remove the background and edit the sizing so that this left size of the plot will match up neatly with the middle and right sides of the plot
 p_annot <- p_annot +
-    geom_hline(yintercept = n_entries - 1 + 0.5) +
+    geom_hline(yintercept = n_entries - 1 + 0.5, colour = "#696767") +
+    scale_color_identity() +
     theme_void() +
     coord_cartesian(xlim = c(0, 2), ylim = c(1, n_entries))
 
@@ -217,7 +225,7 @@ layout <- c(
 p <- p_labels + forest_plot + p_annot + plot_layout(design = layout)
 plot(p)
 ggsave(
-    paste("forest_", paste(subset_name, effect_size, sep = "_"), ".pdf", sep = ""),
+    paste("forest_", paste(subgroup_strategy, effect_size, sep = "_"), ".pdf", sep = ""),
     plot = p,
     height = n_entries * 0.5,
     # this keeps more or less the same distance between plot entries/rows
