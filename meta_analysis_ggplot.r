@@ -42,7 +42,7 @@ dat <- get_effect_size(dat, effect_size_mean, effect_size_sd)
 
 # Get overall meta-analysis result
 overall_res <- rma.uni(yi, vi, data = dat, method = "REML")
-test_heterogeneity(data = dat, overall_res, mods = c("Output approach", "Type of input data", "Forecast horizon", "Training and testing approach", "Year", "Data source"))
+test_heterogeneity(data = dat, overall_res, mods = c("Output approach", "Input data source", "Forecast horizon", "Training and testing approach", "Year", "Data source"))
 
 weights <- fmtx(weights(overall_res), digits = 2)
 dat <- mutate(dat, weights = weights)
@@ -104,7 +104,7 @@ for (sg in rev(names(res_dict))) {
 
     # Add summary for this subgroup (if there are subgroups with less than 2 entries, subgroup analysis in not performed)
     if (subgroup_analysis) {
-        temp <- make_summary(dat_subgroup, entries, layers, n_entries, pos = y_iter)
+        temp <- make_summary(dat_subgroup, entries, layers, n_entries, subgroup_name = sg, pos = y_iter)
         entries <- temp[[1]]
         layers <- temp[[2]]
     }

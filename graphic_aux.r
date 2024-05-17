@@ -72,7 +72,7 @@ get_summary_info <- function(res, pos, weight, subtotal = TRUE) {
 }
 
 
-make_summary <- function(dat, entries, layers, n_entries, pos, subtotal = TRUE) {
+make_summary <- function(dat, entries, layers, n_entries, pos, subgroup_name = "overall", subtotal = TRUE) {
     output <- get_summary(dat, pos)
     summary_polygon <- output[[1]]
     res <- output[[2]]
@@ -91,12 +91,14 @@ make_summary <- function(dat, entries, layers, n_entries, pos, subtotal = TRUE) 
     )
     layers <- c(layers, new_layers)
 
-    print(paste(
-        fmtx(coef(res), digits = 2),
-        " (\\gls{CI}=", fmtx(res$ci.lb, digits = 2), "-", fmtx(res$ci.ub, digits = 2),
-        ", I$^2$=", fmtx(res$I2, digits = 2), "\\%)",
-        sep = ""
-    ))
+    print(
+        paste(subgroup_name, ": ",
+            fmtx(coef(res), digits = 2),
+            " (\\gls{CI}=", fmtx(res$ci.lb, digits = 2), "-", fmtx(res$ci.ub, digits = 2),
+            ", I$^2$=", fmtx(res$I2, digits = 2), "\\%)",
+            sep = ""
+        )
+    )
 
     return(list(entries, layers))
 }

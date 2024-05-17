@@ -46,8 +46,9 @@ test_heterogeneity <- function(data, overall_res, mods) {
         print(paste(
             mod,
             "| I^2 with mods", fmtx(overall_res_mods$I2, digits = 2),
-            "| min counts:", min(table(data[[mod]])),
+            "| relative decrease:", fmtx(((overall_res$I2 - overall_res_mods$I2) / overall_res$I2) * 100, digits = 2), "%",
             sep = " "
         ))
     }
+    cat("\n")
 }
