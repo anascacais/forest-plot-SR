@@ -39,7 +39,7 @@ prepare_dataframe <- function(dat, subset_strategy, subset_name, subgroup_strate
 
 
     dat <- mutate(dat, key = paste(
-        dat$"First author, year", dat$"Forecast horizon", dat$"Input data", dat$"Training and testing approach",
+        dat$"First author, year", dat$"Forecast horizon", dat$"Input data", dat$"Training and testing approach", dat$"Total # seizures",
         sep = ", "
     ))
 
