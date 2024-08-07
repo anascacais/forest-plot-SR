@@ -44,7 +44,9 @@ prepare_dataframe <- function(dat, subset_strategy, subset_name, subgroup_strate
     ))
 
     dat$key <- as.character(dat$key)
-    dat[[subgroup_strategy]] <- as.character(dat[[subgroup_strategy]])
+    if (!is.na(subset_strategy)) {
+        dat[[subgroup_strategy]] <- as.character(dat[[subgroup_strategy]])
+    }
     dat[[effect_size_sd]] <- as.numeric(dat[[effect_size_sd]])
     dat[[effect_size_mean]] <- as.numeric(dat[[effect_size_mean]])
     dat$"# Patients" <- as.numeric(dat$"# Patients")

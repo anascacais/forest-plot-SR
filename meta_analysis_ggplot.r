@@ -6,18 +6,18 @@ library(here)
 source("meta_analysis_aux.r")
 source("data_aux.r")
 source("graphic_aux.r")
-source(here::here("resources", "meta-analysis.xlsx"))
 
 subset_strategy <- NA # "Output approach"
 subset_name <- NA
 
-subgroup_strategy <- "Data source" # "Type of input data"
+subgroup_strategy <- "First author, year" # "Type of input data"
+subgroup_analysis <- FALSE
 
 study_label_strategy <- "First author, year"
 
 effect_size <- "BSS"
 
-
+filename <- "resources/meta-analysis.xlsx"
 data <- read_excel(
     filename,
     sheet = "meta-analysis",
@@ -54,9 +54,9 @@ dat <- temp[[1]]
 res_dict <- temp[[2]]
 n_entries <- temp[[3]]
 
-subgroup_analysis <- TRUE # !any(sapply(res_dict, function(x) x$count < 2))
+# !any(sapply(res_dict, function(x) x$count < 2))
 if (!subgroup_analysis) {
-    n_entries <- n_entries - length(names(res_dict))
+    n_entries <- n_entries - length(names(res_dict)) - length(names(res_dict))
 }
 
 ############################################################################
@@ -85,11 +85,13 @@ for (sg in rev(names(res_dict))) {
     dat_subgroup <- mutate(dat_subgroup, yn = seq(y_iter + 1, y_iter + res_dict[[sg]]$count))
 
     # add subgroup label
-    new_entries <- data.frame(
-        entry = n_entries - y_iter - res_dict[[sg]]$count + 0.5,
-        label = sg
-    )
-    entries <- rbind.fill(entries, new_entries)
+    if (subgroup_analysis) {
+        new_entries <- data.frame(
+            entry = n_entries - y_iter - res_dict[[sg]]$count + 0.5,
+            label = sg
+        )
+        entries <- rbind.fill(entries, new_entries)
+    }
 
     # create label between the entry and the Study and respective weight
     new_entries <- data.frame(
@@ -114,7 +116,7 @@ for (sg in rev(names(res_dict))) {
     }
 
     # add empty entry between subgroups
-    y_iter <- y_iter + res_dict[[sg]]$count + 1 + (1 * subgroup_analysis)
+    y_iter <- y_iter + res_dict[[sg]]$count + (2 * subgroup_analysis)
 }
 
 
@@ -230,8 +232,15 @@ layout <- c(
 
 p <- p_labels + forest_plot + p_annot + plot_layout(design = layout)
 plot(p)
+
+if (subgroup_analysis) {
+    plot_filename <- paste("results/forest_", paste(subgroup_strategy, effect_size, sep = "_"), ".png", sep = "")
+} else {
+    plot_filename <- paste("results/forest_", effect_size, ".png", sep = "")
+}
+
 ggsave(
-    paste("results/forest_", paste(subgroup_strategy, effect_size, sep = "_"), ".png", sep = ""),
+    plot_filename,
     plot = p,
     height = n_entries * 0.5,
     # this keeps more or less the same distance between plot entries/rows
