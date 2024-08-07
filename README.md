@@ -12,24 +12,28 @@ Forest plots provide a graphical summary of multiple individual results, allowin
 
 In this case, I used forest plots in the context of a meta-analysis to summarize the current performance of automated algorithms for the forecast of seizure risk. The main objectives were to answer the following questions:
 
-1. What is the benchmark performance of automated algorithms for forecast of seizure risk?
-2. Which data are the most valuable biomarkers for seizures?
-3. Which algorithm design factors provide more informative forecasts?
+**Q1:** What is the benchmark performance of automated algorithms for forecast of seizure risk?  
+**Q2:** Which data are the most valuable biomarkers for seizures?  
+**Q3:** Which algorithm design factors provide more informative forecasts?
 
 ## Exploring data
 
-As a newcomer to R, I started on a post by Katherine Hoffman (https://www.khstats.com/blog/forest-plots/), which used 𝑚𝑒𝑡𝑎𝑓𝑜𝑟, 𝑔𝑔𝑝𝑙𝑜𝑡2, and 𝑝𝑎𝑡𝑐ℎ𝑤𝑜𝑟𝑘. But, I was finding it challenging to customize the visualization (namely, when it came to **subgroup analysis** and adding **algorithm characteristics** to it).
+As a newcomer to R, I started on a post by [Katherine Hoffman](https://www.khstats.com/blog/forest-plots/), which used 𝑚𝑒𝑡𝑎𝑓𝑜𝑟, 𝑔𝑔𝑝𝑙𝑜𝑡2, and 𝑝𝑎𝑡𝑐ℎ𝑤𝑜𝑟𝑘. But, I was finding it challenging to customize the visualization (namely, when it came to **subgroup analysis** and adding **algorithm characteristics** to it).
 
 So I adapted the original code to, without the need to modify the original data (spreadsheet), do the following:
 
-- Perform subgroup analysis by providing only the name of the column with the wanted factor
+- Perform subgroup analysis by providing only the name of the column that sets the subgroup strategy
 - Expand visualization with algorithm characteristics (forecast horizon, sample size, number of seizures, and train/test approach)
 - Customize colors and symbols
 
-To
+#### Q1. Performance benchmark
+
+_(explain metrics here)_
+
+![Overall forest plot for BSS](results/forest_BSS.png "Overall forest plot for BSS")
+
+#### Q2. Seizure biomarkers
+
+#### Q3. Algorithm design
 
 ## Interpreting the results
-
-1.
-
-[Example](results/forest_Data%20source_BSS.png)
