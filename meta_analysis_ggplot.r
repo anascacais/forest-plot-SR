@@ -10,12 +10,12 @@ source("graphic_aux.r")
 subset_strategy <- NA # "Output approach"
 subset_name <- NA
 
-subgroup_strategy <- "First author, year" # "Type of input data"
-subgroup_analysis <- FALSE
+subgroup_strategy <- "Forecast horizon" # "Type of input data"
+subgroup_analysis <- TRUE
 
 study_label_strategy <- "First author, year"
 
-effect_size <- "BSS"
+effect_size <- "AUC"
 
 filename <- "resources/meta-analysis.xlsx"
 data <- read_excel(
