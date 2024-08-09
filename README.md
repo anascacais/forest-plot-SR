@@ -8,7 +8,7 @@ Forest plots provide a graphical summary of multiple individual results, allowin
 - Estimation of overall result
 - Stratification by specific factors
 
-## What we are trying to understand?
+## What are we trying to understand?
 
 In this case, I used forest plots in the context of a meta-analysis to summarize the current performance of automated algorithms for the forecast of seizure risk. The main objectives were to answer the following questions:
 
