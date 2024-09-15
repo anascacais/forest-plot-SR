@@ -25,6 +25,7 @@ get_effect_size <- function(dat, effect_size_mean, effect_size_sd) {
 
 prepare_subgroup_analysis <- function(dat, subgroup_strategy, subgroup_analysis = TRUE) {
     # Order data according to subgroup and yi
+
     dat <- mutate(dat, subgroup = dat[[subgroup_strategy]])
     dat <- dat[order(dat$"First author, year", decreasing = TRUE), ]
 
@@ -42,7 +43,7 @@ prepare_subgroup_analysis <- function(dat, subgroup_strategy, subgroup_analysis 
 test_heterogeneity <- function(data, overall_res, mods) {
     print(paste("overall I^2:", fmtx(overall_res$I2, digits = 2)))
     for (mod in mods) {
-        overall_res_mods <- rma.uni(yi, vi, data = data, method = "REML", mods = ~ factor(dat[[mod]]))
+        overall_res_mods <- rma.uni(yi, vi, data = data, method = "REML", mods = ~ factor(data[[mod]]))
         print(paste(
             mod,
             "| I^2 with mods", fmtx(overall_res_mods$I2, digits = 2),
@@ -50,5 +51,28 @@ test_heterogeneity <- function(data, overall_res, mods) {
             sep = " "
         ))
     }
+    cat("\n")
+}
+
+# Independent Effects: Each moderator's effect on the outcome (effect size) is estimated while holding the other moderators constant.
+test_heterogeneity_multivariate <- function(data, overall_res, mods, interaction) {
+    print(paste("overall I^2:", fmtx(overall_res$I2, digits = 2)))
+
+    if (interaction) {
+        coll <- " * "
+    } else {
+        coll <- " + "
+    }
+
+    multivariate_string <- paste("~", paste(paste0("factor(data[[\"", mods, "\"]])"), collapse = coll))
+    multivariate_mods <- as.formula(multivariate_string)
+
+    overall_res_mods <- rma.uni(yi, vi, data = data, method = "REML", mods = multivariate_mods)
+    print(paste(
+        paste(paste0(mods), collapse = coll),
+        "| I^2 with mods", fmtx(overall_res_mods$I2, digits = 2),
+        "| relative decrease:", fmtx(((overall_res$I2 - overall_res_mods$I2) / overall_res$I2) * 100, digits = 2), "%",
+        sep = " "
+    ))
     cat("\n")
 }
